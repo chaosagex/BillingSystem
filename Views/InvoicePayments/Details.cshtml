@@ -1,0 +1,97 @@
+﻿@model BillingSystem.Models.InvoicePayment
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>InvoicePayment</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Date)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Date)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.PaymentItems)
+        </dt>
+        <dd class="col-sm-10">
+            <div class="row">
+                @foreach (PaymentDetail item in Model.PaymentItems)
+                {
+                    <div class="col-3">
+                        <label>@item.Name</label>
+                    </div>
+                    <div class="col-6">
+                        <label>@item.Amount</label>
+                    </div>
+                    <br />
+                }
+            </div>
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.TotalCost)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.TotalCost)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Paid)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Paid)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Remaining)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Remaining)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.PreviousPaymentNavigation)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PreviousPaymentNavigation.Id)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.StudentNavigation)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.StudentNavigation.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Notes)
+        </dt>
+        <dd class="col-sm-10">
+            <div class="row">
+                @{
+                    if (Model.Notes == null)
+                    {
+                        @Html.DisplayFor(model => model.Notes)
+                    }
+                    else
+                    {
+                        string[] notes = Model.Notes.Split("\r\n");
+                        foreach (string note in notes)
+                        {
+                            <div class="col-12">
+                                <label>@note</label>
+                            </div>
+                            <br />
+                        }
+                    }
+
+                }
+            </div>
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

@@ -1,0 +1,142 @@
+﻿@model BillingSystem.Models.invoiceView
+@addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Edit</h1>
+
+<h4>InvoicePayment</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit" id="edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="invoice.Id" />
+            <div class="form-group">
+                <label asp-for="invoice.Student" class="control-label"></label>
+                <select asp-for="invoice.Student" id="student" onchange="updateStudent()" class="form-control" asp-items="ViewBag.Student"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="invoice.Date" class="control-label"></label>
+                <input asp-for="invoice.Date" class="form-control" />
+
+                <span asp-validation-for="invoice.Date" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="invoice.TotalCost" class="control-label"></label>
+                <input asp-for="invoice.TotalCost" id="cost" class="form-control" disabled />
+                <span asp-validation-for="invoice.TotalCost" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="invoice.Paid" class="control-label"></label>
+                <input asp-for="invoice.Paid" id="paid" class="form-control" onchange="updateEdit()" />
+                
+                   <span class="text-danger">@ViewBag.Message</span>
+                
+                <span asp-validation-for="invoice.Paid" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="invoice.Remaining" class="control-label"></label>
+                <input asp-for="invoice.Remaining" id="rem" class="form-control" disabled />
+                <span asp-validation-for="invoice.Remaining" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="invoice.PreviousPayment" class="control-label"></label>
+                <input asp-for="invoice.PreviousPayment" value="@Model.invoice.PreviousPayment" class="form-control " disabled />
+            </div>
+
+            <table>
+                @for (int i = 0; i < this.Model.items.Count; i++)
+                {
+                    int j = i + 1;
+                    <input type="checkbox" id=@String.Format("{0}{1}","cb",i) asp-for="@Model.items[i].selected" onclick="editUpdate(@i)" />
+                    <label asp-for="@Model.items[i].selected">@Model.items[i].Name</label>
+                    <input type="hidden" asp-for="@Model.items[i].Id" />
+                    <input type="hidden" asp-for="@Model.items[i].Name" />
+                    <input type="hidden" asp-for="@Model.items[i].Year" />
+                    <input type="hidden" id=@String.Format("{0}{1}","am",i) asp-for="@Model.items[i].Amount" />
+                    <br />
+                }
+            </table>
+            <input type="hidden" asp-for="invoice.PreviousPayment" />
+            <input type="hidden" asp-for="invoice.Remaining" />
+            <div class="form-group">
+                <label asp-for="invoice.Notes" class="control-label"></label>
+                <textarea  asp-for="invoice.Notes" class="form-control" disabled></textarea>
+                <span asp-validation-for="invoice.Notes" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function updateEdit() {
+            var paid = Number(document.getElementById("paid").value);
+            var rem = document.getElementById("rem");
+            var cost = Number(document.getElementById("cost").value);
+            var remaining = Number(rem.value);
+            var current=0;
+            if(cost==0)
+                current = @Model.invoice.TotalCost-paid;
+            else if(paid==@Model.invoice.Paid&& cost==@Model.invoice.TotalCost)
+                current = @Model.invoice.Remaining;
+            else
+                current = cost+remaining-paid-@Model.invoice.Remaining;
+            rem.value = current;
+        }
+        function editUpdate(i) {
+    var cb = document.getElementById("cb" + i);
+    var costBox = document.getElementById("cost");
+    var am = Number(document.getElementById("am" + i).value);
+    var current = Number(costBox.value);
+    var rem = document.getElementById("rem");
+    var paid = Number(document.getElementById("paid").value);
+    var remaining = Number(rem.value);
+    if (cb.checked) {
+        current += am;
+        costBox.value = current;
+        var currentRemaining = am + remaining;
+        rem.value = currentRemaining;
+    }
+    else {
+        
+        current -= am;
+        costBox.value = current;
+        var currentRemaining = remaining-am;
+        rem.value = currentRemaining;
+    }
+
+}
+function updateStudent() {
+    var data = $("#edit").serialize()
+    console.log(data);
+    $.ajax({
+        type: 'POST',
+        url: '/InvoicePayments/Edit',
+        contentType: 'application/x-www-form-urlencoded; charset=UTF-8', // when we use .serialize() this generates the data in query string format. this needs the default contentType (default content type is: contentType: 'application/x-www-form-urlencoded; charset=UTF-8') so it is optional, you can remove it
+        data: data,
+        success: function (result) {
+            document.open();
+            document.write(result);
+            document.close();
+        },
+         error: function(XMLHttpRequest, textStatus, errorThrown) { 
+        alert("Status: " + textStatus); alert("Error: " + errorThrown); 
+    }       
+    })
+}
+    </script>
+}
